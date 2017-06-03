@@ -21,6 +21,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
@@ -35,9 +37,6 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences sPref ;
     static final String KEY_OF_SMS_READER = "key_of_message";
     static final String IV_OF_SMS_READER = "iv_of_message";
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +62,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
     public void onClickOpenTelegramLink(View v){
 
         String android_id = Settings.Secure.getString(MainActivity.this.getContentResolver(),
@@ -74,62 +71,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
 
     }
-
-    public void onClickTestEncrypt(View v) throws GeneralSecurityException, UnsupportedEncodingException {
-
-
-        String text = "Зашифрованное сообщение";
-        String from = "+79998393459";
-
-        String codeFromPref = sPref.getString(KEY_OF_SMS_READER, "");
-        String iv = sPref.getString(IV_OF_SMS_READER, "");
-
-        String code = codeFromPref+codeFromPref+codeFromPref+"z";
-
-
-        SecretKeySpec secretKeySpec = new SecretKeySpec(code.getBytes(), "AES");
-
-        byte[] str = encrypt(secretKeySpec, text.getBytes("UTF-8"), iv.getBytes());
-        String resultString = Base64.encodeToString(str, Base64.DEFAULT);
-        Toast.makeText(MainActivity.this, resultString, Toast.LENGTH_SHORT).show();
-
-        CallAPI mt = new CallAPI();
-        String android_id = Settings.Secure.getString(MainActivity.this.getContentResolver(),
-                Settings.Secure.ANDROID_ID);
-        mt.execute("set-message/"+android_id,"from="+
-                URLEncoder.encode(from,"UTF-8")+"&message="+
-                URLEncoder.encode(resultString,"UTF-8"));
-
-        String result = null;
-        try {
-            result = mt.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        Toast.makeText(MainActivity.this, result, Toast.LENGTH_SHORT).show();
-
-
-    }
-
-
-    public void onClickSendCrypt(View v) throws ExecutionException, InterruptedException, JSONException {
-//        CallAPI mt = new CallAPI();
-////        String android_id = Settings.Secure.getString(MainActivity.this.getContentResolver(),
-////                Settings.Secure.ANDROID_ID);
-////        mt.execute("decrypt/ccdc84ca5d167831/123","T4LhX1QBzjy52zl/uKH+rcfAcUaYpt94Aw==");
-//        mt.execute("decrypt/ccdc84ca5d167831/123/TqPgZ1U+zw+538kX38huXJSRFC3yyY4bUYY=","");
-//        String result = mt.get();
-//
-//
-
-
-
-//        Toast.makeText(MainActivity.this, String.valueOf(i1), Toast.LENGTH_SHORT).show();
-    }
-
-
 
     public String registration()
     {
@@ -172,15 +113,5 @@ public class MainActivity extends AppCompatActivity {
         TextView etText = (TextView) findViewById(R.id.textView);
         etText.setText(String.valueOf(i1));
 
-    }
-
-    public static byte[] encrypt(SecretKey secret, byte[] buffer,  byte[] ivData) throws GeneralSecurityException
-    {
-    /* Encrypt the message. */
-        Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
-        cipher.init(Cipher.ENCRYPT_MODE, secret, new IvParameterSpec(ivData));
-        byte[] ciphertext = cipher.doFinal(buffer);
-
-        return ciphertext;
     }
 }
