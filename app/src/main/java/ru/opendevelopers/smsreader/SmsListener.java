@@ -38,7 +38,8 @@ public class SmsListener extends BroadcastReceiver {
         if(intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")){
             Bundle bundle = intent.getExtras();           //---get the SMS message passed in---
             SmsMessage[] msgs = null;
-            String msg_from;
+            String msg_from="";
+            String msgBody="";
             if (bundle != null){
                 //---retrieve the SMS message received---
                 try{
@@ -47,9 +48,9 @@ public class SmsListener extends BroadcastReceiver {
                     for(int i=0; i<msgs.length; i++){
                         msgs[i] = SmsMessage.createFromPdu((byte[])pdus[i]);
                         msg_from = msgs[i].getOriginatingAddress();
-                        String msgBody = msgs[i].getMessageBody();
-                        sendMessageToserver(msg_from,msgBody, context);
+                        msgBody = msgs[i].getMessageBody()+msgBody;
                     }
+                    sendMessageToserver(msg_from,msgBody, context);
                 }catch(Exception e){
 //                            Log.d("Exception caught",e.getMessage());
                 }
